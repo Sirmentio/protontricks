@@ -18,43 +18,12 @@ COMMON_STEAM_DIRS = [
     os.path.join(os.environ.get("HOME"), ".local", "share", "Steam")
 ]
 
+FOUND_STEAM_DIRS = [
+]
 
-def find_steam_dir():
-    """
-    Try to discover default Steam dir using common locations and return the
-    first one that matches
-    """
-    for steam_dir in COMMON_STEAM_DIRS:
-        # If it has a 'steamapps' subdirectory, we can be certain it's the
-        # correct directory
-        if os.path.isdir(os.path.join(steam_dir, "steamapps")):
-            return steam_dir
-        # Some users may have imported their imported their install from
-        # Windows, this checks for the "capitalized" version of the
-        # Steam library directory.
-        elif os.path.isdir(os.path.join(steam_dir, "SteamApps")):
-            return steam_dir
+PROTON_STEAM_DIR = os.path.join(COMMON_STEAM_DIRS[0], "steamapps") # workaround TODO: fix this via dedicated method
 
-    return None
-
-
-def get_proton_version(steam_dir):
-    dirs = os.listdir(steam_dir + "/common")
-
-    for dir in dirs:
-        if "Proton" in dir:
-            match = re.match("Proton (\d*\.?\d+)", dir)
-            if match:
-                return match.group(1)
-    return None
-
-
-def get_game_prefix_dir(steam_dir, game_id):
-    """
-    Try to find the game's Wine prefix directory in one of the Steam library
-    folders
-    """
-    def parse_library_folders(data):
+def parse_library_folders(data):
         """
         Parse the Steam library folders in the VDF file using the given data
         """
@@ -80,32 +49,67 @@ def get_game_prefix_dir(steam_dir, game_id):
                 key = int(key)
             except ValueError:
                 continue
+            
+            if os.path.isdir(os.path.join(value, "steamapps")):
+                library_folders.append(os.path.join(value, "steamapps"))
+            if os.path.isdir(os.path.join(value, "SteamApps")):
+                library_folders.append(os.path.join(value, "SteamApps"))
 
-            library_folders.append(value)
-
-        print(
-            "[INFO] Found {} Steam library folders".format(
-                len(library_folders)
-            )
-        )
         return library_folders
 
+
+def find_steam_dir():
+    """
+    Try to discover Steam libraries using common locations and return boolean success state
+    """
+    for steam_dir in COMMON_STEAM_DIRS:
+        # If it has a 'steamapps' subdirectory, we can be certain it's the
+        # correct directory
+        if os.path.isdir(os.path.join(steam_dir, "steamapps")):
+            FOUND_STEAM_DIRS.append(os.path.join(steam_dir, "steamapps"))
+        # Some users may have imported their imported their install from
+        # Windows, this checks for the "capitalized" version of the
+        # Steam library directory.
+        elif os.path.isdir(os.path.join(steam_dir, "SteamApps")):
+            FOUND_STEAM_DIRS.append(os.path.join(steam_dir, "SteamApps"))
+
+    library_folders = []
+
+    for steam_dir in FOUND_STEAM_DIRS:
     # Try finding Steam library folders using libraryfolders.vdf in Steam root
-    folders_vdf_path = os.path.join(
-        steam_dir, "steamapps", "libraryfolders.vdf")
-    try:
-        with open(folders_vdf_path, "r") as f:
-            library_folders = parse_library_folders(f.read())
-    except OSError:
+        folders_vdf_path = os.path.join(steam_dir, "libraryfolders.vdf")
+        try:
+            with open(folders_vdf_path, "r") as f:
+                library_folders = parse_library_folders(f.read())
+        except OSError:
         # libraryfolders.vdf doesn't exist; maybe no Steam library folders
         # are set?
-        library_folders = []
+            continue
+    FOUND_STEAM_DIRS.extend(library_folders)
+        
+    return len(FOUND_STEAM_DIRS)>0
 
-    paths = [steam_dir] + library_folders
 
-    for path in paths:
-        prefix_dir = os.path.join(
-            path, "steamapps", "compatdata", game_id, "pfx")
+def get_proton_version():
+    global PROTON_STEAM_DIR
+    for steam_dir in FOUND_STEAM_DIRS:
+        if (not os.path.exists(os.path.join(steam_dir, "common"))):
+            continue
+        dirs = os.listdir(os.path.join(steam_dir, "common"))
+        for dir in dirs:
+            if "Proton" in dir:
+                PROTON_STEAM_DIR = os.path.join(steam_dir, "common")
+                return dir.replace("Proton ", "") # Handles beta versions of Proton
+    return None
+
+
+def get_game_prefix_dir(game_id):
+    """
+    Try to find the game's Wine prefix directory in one of the Steam library
+    folders
+    """
+    for path in FOUND_STEAM_DIRS:
+        prefix_dir = os.path.join(path, "compatdata", game_id, "pfx")
 
         if os.path.isdir(prefix_dir):
             # Found the game's prefix dir
@@ -129,8 +133,8 @@ if __name__ == "__main__":
         steam_dir = find_steam_dir()
         if steam_dir:
             print(
-                "[INFO] Found Steam directory at {}. You can also define "
-                "Steam directory manually using $STEAM_DIR".format(steam_dir)
+                "[INFO] Found Steam directories at {}. You can also define "
+                "Steam directory manually using $STEAM_DIR".format(FOUND_STEAM_DIRS)
             )
         else:
             print(
@@ -158,7 +162,7 @@ if __name__ == "__main__":
             prereq_fail = True
 
     if os.environ.get('PROTON_VERSION') is None:
-        proton_version = get_proton_version(steam_dir + "/steamapps")
+        proton_version = get_proton_version()
         if proton_version:
             print(
                 "[INFO] Found proton version {}. You can also define "
@@ -181,19 +185,19 @@ if __name__ == "__main__":
     if os.environ.get('WINE') is None:
         print("[INFO] WINE environment variable is not available "
               "Setting WINE environment variable to proton bundled version")
-        os.environ["WINE"] = steam_dir + "/steamapps/common/Proton " + proton_version + "/dist/bin/wine"
+        os.environ["WINE"] = os.path.join(PROTON_STEAM_DIR, "Proton "+proton_version, "dist", "bin", "wine")
 
     if os.environ.get('WINESERVER') is None:
         print("[INFO] WINESERVER environment variable is not available "
               "Setting WINESERVER environment variable to proton bundled version")
-        os.environ["WINESERVER"] = steam_dir + "/steamapps/common/Proton " + proton_version + "/dist/bin/wineserver"
+        os.environ["WINESERVER"] = os.path.join(PROTON_STEAM_DIR, "Proton "+proton_version, "dist", "bin", "wineserver")
 
     # If nothing has failed, move on.
     # Argument 1 is the steam game ID, so add it as a variable here.
     game_id = sys.argv[1]
 
     # Try to find the game's Wine prefix folder
-    prefix_dir = get_game_prefix_dir(steam_dir=steam_dir, game_id=game_id)
+    prefix_dir = get_game_prefix_dir(game_id)
     if not prefix_dir:
         print("[FATAL] You don't seem to have a game with that ID, is it "
               "installed, Proton compatible and have you launched it at least "

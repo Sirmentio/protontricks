@@ -157,7 +157,10 @@ def get_proton_dir(steam_lib_dirs, proton_version):
     preferring the `proton_version` version of Proton
     """
     for path in steam_lib_dirs:
-        dirs = os.listdir(os.path.join(path, "steamapps", "common"))
+        try:
+            dirs = os.listdir(os.path.join(path, "steamapps", "common"))
+        except FileNotFoundError:
+            continue
 
         for app_name in dirs:
             if "Proton" in app_name:

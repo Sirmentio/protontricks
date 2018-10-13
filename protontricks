@@ -232,10 +232,10 @@ if __name__ == "__main__":
                   "automatically and $PROTON_VERSION wasn't set")
             sys.exit(-1)
     else:
+        proton_version = os.environ.get("PROTON_VERSION")
         print("[INFO] Using preferred Proton installation {}".format(
             proton_version
         ))
-        proton_version = os.environ.get("PROTON_VERSION")
 
 
     proton_dir = get_proton_dir(

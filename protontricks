@@ -276,9 +276,9 @@ if __name__ == "__main__":
               "Looking for winetricks in "
               "/usr/bin/winetricks and /usr/local/bin/winetricks...")
         if os.path.exists("/usr/bin/winetricks"):
-                os.environ["WINETRICKS"] = "/usr/bin/winetricks"
+            os.environ["WINETRICKS"] = "/usr/bin/winetricks"
         elif os.path.exists("/usr/local/bin/winetricks"):
-                os.environ["WINETRICKS"] = "/usr/local/bin/winetricks"
+            os.environ["WINETRICKS"] = "/usr/local/bin/winetricks"
         else:
             print("[ERROR!] Couldn't find winetricks, please install "
                   "winetricks in order to use this script!")

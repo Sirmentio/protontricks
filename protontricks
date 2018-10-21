@@ -273,10 +273,14 @@ if __name__ == "__main__":
 
     if os.environ.get('WINETRICKS') is None:
         print("[INFO] WINETRICKS environment variable is not available. "
-              "Falling back to /usr/bin/winetricks")
-        os.environ["WINETRICKS"] = "/usr/bin/winetricks"
-        if not os.path.exists("/usr/bin/winetricks"):
-            print("[ERROR!] Winetricks isn't installed, please install "
+              "Looking for winetricks in "
+              "/usr/bin/winetricks and /usr/local/bin/winetricks...")
+        if os.path.exists("/usr/bin/winetricks"):
+                os.environ["WINETRICKS"] = "/usr/bin/winetricks"
+        elif os.path.exists("/usr/local/bin/winetricks"):
+                os.environ["WINETRICKS"] = "/usr/local/bin/winetricks"
+        else:
+            print("[ERROR!] Couldn't find winetricks, please install "
                   "winetricks in order to use this script!")
             prereq_fail = True
     else:

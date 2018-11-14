@@ -81,9 +81,13 @@ class SteamApp(object):
         """
         Parse appmanifest_X.acf file containing Steam app installation metadata
         and return a SteamApp object
+        Ignore corrupted manifest files
         """
         with open(path, "r") as f:
-            content = f.read()
+            try:
+                content = f.read()
+            except:
+                return None
 
         # App manifest may be completely empty for some reason.
         # In that case, skip it

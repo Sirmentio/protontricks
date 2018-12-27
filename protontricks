@@ -426,4 +426,9 @@ if __name__ == "__main__":
             os.environ.get('WINEPREFIX')
         )
     )
-    subprocess.call([os.environ.get('WINETRICKS')] + sys.argv[2:])
+    subprocess.call(
+    	[
+        	os.path.join(steam_dir, 'ubuntu12_32', 'steam-runtime', 'run.sh'),
+        	os.environ.get('WINETRICKS')
+        ] + sys.argv[2:]
+    )

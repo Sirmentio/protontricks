@@ -1,3 +1,7 @@
+# THIS IS NO LONGER MAINTAINED!
+If you're looking for an up to date fork, my suggestion is [HERE](https://github.com/Matoking/protontricks)
+
+
 # protontricks
 A simple wrapper that does winetricks things for Proton enabled games, requires Winetricks.
 

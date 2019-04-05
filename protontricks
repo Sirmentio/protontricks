@@ -237,11 +237,11 @@ def get_steam_apps(steam_lib_dirs):
     steam_apps = []
 
     for path in steam_lib_dirs:
-        if os.path.isdir(os.path.join(steam_dir, "steamapps")):
+        if os.path.isdir(os.path.join(path, "steamapps")):
             appmanifest_paths = glob.glob(
                 os.path.join(path, "steamapps", "appmanifest_*.acf")
             )
-        elif os.path.isdir(os.path.join(steam_dir, "SteamApps")):
+        elif os.path.isdir(os.path.join(path, "SteamApps")):
             appmanifest_paths = glob.glob(
                 os.path.join(path, "SteamApps", "appmanifest_*.acf")
             )
@@ -426,4 +426,9 @@ if __name__ == "__main__":
             os.environ.get('WINEPREFIX')
         )
     )
-    subprocess.call([os.environ.get('WINETRICKS')] + sys.argv[2:])
+    subprocess.call(
+    	[
+        	os.path.join(steam_dir, 'ubuntu12_32', 'steam-runtime', 'run.sh'),
+        	os.environ.get('WINETRICKS')
+        ] + sys.argv[2:]
+    )

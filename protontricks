@@ -8,7 +8,9 @@
 # Script by Sirmentio, Copyright 2018, Licensed under the GPLv3!
 
 import binascii
-import glob
+# binascii module contains a number of methods to convert between binary and various ASCII-encoded binary representations.
+# use wrapper modules like uu , base64 , or binhex instead
+import glob # retrieve files/pathnames matching a specified pattern
 import os
 import re
 import string

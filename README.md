@@ -6,7 +6,7 @@ If you're looking for an up to date fork, my suggestion is [HERE](https://github
 A simple wrapper that does winetricks things for Proton enabled games, requires Winetricks.
 
 # What is it?
-This is a simple wrapper script that uses Winetricks to allow you to specify the game's App ID rather than the full length directory to the Proton prefix itself, I thought this would be easier for some so I decided to upload it for everyone to use!
+This is a simple wrapper script that uses Winetricks to allow you to specify the game's App ID rather than the full length directory to the Proton prefix itself, I thought this would be easier for some so I decided to upload it for everyone to use!Protontricks is image Coverage Status Build Status. A simple wrapper that does winetricks things for Proton enabled games, requires Winetricks
 
 # Requirements
 * Python 3 or newer
@@ -32,6 +32,7 @@ Since this is a wrapper, all syntax that works for Winetricks will potentially w
 If you have a different Steam directory (Like I do due to Arch's silly directory tomfoolery), you can export ``$STEAM_DIR`` to the directory where Steam is.
 
 If you'd like to use a local version of Winetricks, you can set ``$WINETRICKS`` to the location of your local winetricks installation. As well, you can set ``$PROTON_VERSION`` to a specific version manually.
+A simple wrapper that does winetricks things for Proton enabled games, requires Winetricks.
 
 [Wanna see Protontricks in action?](https://asciinema.org/a/i2uqz1uZXYACl9NAHYbuZ3TCT)
 
